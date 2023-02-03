@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="topGuideLine" type="id" />
+    <item name="bottomGuideLine" type="id" />
+    <item name="ivScanArea" type="id" />
+</resources>
