@@ -56,6 +56,18 @@ class MainActivity : AppCompatActivity() {
             })
         }
         requestCameraPermissions.launch(Manifest.permission.CAMERA)
+
+        mBinding.btnFlashlight.setOnClickListener {
+            cameraManager.toggleTorch()
+        }
+
+        mBinding.btnSwitchCamera.setOnClickListener {
+            cameraManager.changeCameraSelector()
+        }
+
+        mBinding.btnSwitchAnalyzer.setOnClickListener {
+            cameraManager.changeCameraType(CameraSearchType.Barcode)
+        }
     }
 
     override fun onResume() {
