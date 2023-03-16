@@ -7,13 +7,18 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.Logger
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.appwise.scanner.CameraSearchType
 import com.appwise.scanner.barcode.BarcodeTarget
 import com.appwise.scanner.base.CameraManager
 import com.appwise.scanner.base.TargetOverlay
+import com.google.android.material.snackbar.Snackbar
 import com.wisemen.scanwise.databinding.ActivityMainBinding
+import com.wisemen.scanwise.scanresult.ScanCodeResult
+import com.wisemen.scanwise.scanresult.ScanCodeResultContract
+import com.wisemen.scanwise.scanresult.ScanResultActivity
 
 class MainActivity : AppCompatActivity() {
 
@@ -68,6 +73,14 @@ class MainActivity : AppCompatActivity() {
         mBinding.btnSwitchAnalyzer.setOnClickListener {
             cameraManager.changeCameraType(CameraSearchType.Barcode)
         }
+
+        mBinding.btnStartScanResult.setOnClickListener {
+            contract.launch(ScanCodeResultContract.ScanResultConfig(true,CameraSearchType.QR))
+        }
+    }
+
+    private val contract = registerForActivityResult(ScanCodeResultContract()){ scanCodeResult ->
+        Log.d("this is scancoderesult","${scanCodeResult?.code}")
     }
 
     override fun onResume() {

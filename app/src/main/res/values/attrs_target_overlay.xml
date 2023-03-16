@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--shared attributes (TargetOverlay and ScanResult Screen-->
+    <attr name="scanAreaCornerRadius" format="reference" />
+    <attr name="scanMaskColor" format="color" />
+    <attr name="scanAreaDrawable" format="reference" />
+
+    <!--attributes for ScanResult Screen-->
+    <attr name="switchAnalyzerEnabled" format="boolean"/>
+    <attr name="toggleFlashLightEnabled" format="boolean"/>
+    <attr name="switchCameraEnabled" format="boolean"/>
+    <attr name="autoScanResultReturn" format="boolean"/>
+</resources>
