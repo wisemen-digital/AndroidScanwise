@@ -1,10 +1,10 @@
 package com.appwise.scanner.base
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.util.DisplayMetrics
 import android.util.Log
 import android.util.Size
+import androidx.activity.ComponentActivity
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.FocusMeteringAction
@@ -15,9 +15,11 @@ import androidx.camera.core.TorchState
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import com.appwise.scanner.CameraSearchType
 import com.appwise.scanner.barcode.CodeAnalyzer
+import com.appwise.scanner.managers.PermissionManager
 import com.appwise.scanner.qr.QRAnalyzer
 import com.appwise.scanner.text.TextAnalyzer
 import java.util.concurrent.ExecutionException
@@ -25,14 +27,44 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 
-class CameraManager(
-    private val context: Context,
-    private val finderView: PreviewView,
-    private val lifecycleOwner: LifecycleOwner,
-    private val targetOverlay: () -> TargetOverlay,
-    // the default for this is the barcode scanner
+class CameraManager {
+
+    private var fragment: Fragment? = null
+    private var activity: ComponentActivity? = null
+    private lateinit var finderView: PreviewView
+    private lateinit var lifecycleOwner: LifecycleOwner
+    private lateinit var targetOverlay: () -> TargetOverlay
     var cameraSearchType: CameraSearchType = CameraSearchType.Barcode
-) {
+
+    fun init(
+        fragment: Fragment,
+        finderView: PreviewView,
+        lifecycleOwner: LifecycleOwner,
+        targetOverlay: () -> TargetOverlay,
+        cameraSearchType: CameraSearchType = CameraSearchType.Barcode
+    ): CameraManager {
+        this.fragment = fragment
+        this.finderView = finderView
+        this.lifecycleOwner = lifecycleOwner
+        this.targetOverlay = targetOverlay
+        this.cameraSearchType = cameraSearchType
+        return this
+    }
+
+    fun init(
+        activity: ComponentActivity,
+        finderView: PreviewView,
+        lifecycleOwner: LifecycleOwner,
+        targetOverlay: () -> TargetOverlay,
+        cameraSearchType: CameraSearchType = CameraSearchType.Barcode
+    ): CameraManager {
+        this.activity = activity
+        this.finderView = finderView
+        this.lifecycleOwner = lifecycleOwner
+        this.targetOverlay = targetOverlay
+        this.cameraSearchType = cameraSearchType
+        return this
+    }
 
     interface CameraManagerListener {
         fun analyzerChanged(cameraSearchType: CameraSearchType) {}
@@ -64,52 +96,75 @@ class CameraManager(
     private val isFrontLens get() = cameraSelectorOption == CameraSelector.LENS_FACING_FRONT
 
     @SuppressLint("UnsafeOptInUsageError")
-    fun startCamera() {
-        val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
-        cameraProviderFuture.addListener(
-            {
-                try {
-                    cameraProvider = cameraProviderFuture.get()
-                    val builder = Preview.Builder()
-                    val metrics = DisplayMetrics().also { finderView.display.getRealMetrics(it) }
-                    val screenSize = Size(metrics.widthPixels, metrics.heightPixels)
+    fun start() {
 
-                    // Preview
-                    preview = builder
-                        .setTargetResolution(screenSize)
-                        .build()
+        activity?.let {
+            PermissionManager.initPermissionRequests(it){
+                startCamera()
+            }
+        }
+        fragment?.let {
+            PermissionManager.initPermissionRequests(it){
+                startCamera()
+            }
+        }
 
-                    // Image analyzer
-                    imageAnalyzer = ImageAnalysis.Builder()
-                        .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-                        .setTargetResolution(screenSize)
-                        .build()
-                        .also {
-                            it.setAnalyzer(cameraExecutor, getSelectedAnalyzer())
-                        }
 
-                    val cameraSelector = CameraSelector.Builder()
-                        .requireLensFacing(cameraSelectorOption)
-                        .build()
+    }
 
-                    // Must unbind the use-cases before rebinding them
-                    cameraProvider?.unbindAll()
-                    camera = cameraProvider?.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalyzer)
+    private fun startCamera(){
+        requireContext()?.let {
+            val cameraProviderFuture = ProcessCameraProvider.getInstance(it)
+            cameraProviderFuture.addListener(
+                {
+                    try {
+                        cameraProvider = cameraProviderFuture.get()
+                        val builder = Preview.Builder()
+                        val metrics = DisplayMetrics().also { finderView.display.getRealMetrics(it) }
+                        val screenSize = Size(metrics.widthPixels, metrics.heightPixels)
 
-                    val autoFocusAction = FocusMeteringAction.Builder(SurfaceOrientedMeteringPointFactory(1f, 1f).createPoint(0.5f, 0.5f), FocusMeteringAction.FLAG_AF).apply {
-                        setAutoCancelDuration(2, TimeUnit.SECONDS)
-                    }.build()
-                    camera?.cameraControl?.startFocusAndMetering(autoFocusAction)
+                        // Preview
+                        preview = builder
+                            .setTargetResolution(screenSize)
+                            .build()
 
-                    preview?.setSurfaceProvider(finderView.surfaceProvider)
-                } catch (e: ExecutionException) {
-                    Log.e("Execution Exception", e.message, e)
-                } catch (e: InterruptedException) {
-                    Log.e("Interrupted Exception", e.message, e)
-                }
-            },
-            ContextCompat.getMainExecutor(context)
-        )
+                        // Image analyzer
+                        imageAnalyzer = ImageAnalysis.Builder()
+                            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+                            .setTargetResolution(screenSize)
+                            .build()
+                            .also {
+                                it.setAnalyzer(cameraExecutor, getSelectedAnalyzer())
+                            }
+
+                        val cameraSelector = CameraSelector.Builder()
+                            .requireLensFacing(cameraSelectorOption)
+                            .build()
+
+                        // Must unbind the use-cases before rebinding them
+                        cameraProvider?.unbindAll()
+                        camera = cameraProvider?.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalyzer)
+
+                        val autoFocusAction = FocusMeteringAction.Builder(
+                            SurfaceOrientedMeteringPointFactory(1f, 1f).createPoint(
+                                0.5f,
+                                0.5f
+                            ), FocusMeteringAction.FLAG_AF
+                        ).apply {
+                            setAutoCancelDuration(2, TimeUnit.SECONDS)
+                        }.build()
+                        camera?.cameraControl?.startFocusAndMetering(autoFocusAction)
+
+                        preview?.setSurfaceProvider(finderView.surfaceProvider)
+                    } catch (e: ExecutionException) {
+                        Log.e("Execution Exception", e.message, e)
+                    } catch (e: InterruptedException) {
+                        Log.e("Interrupted Exception", e.message, e)
+                    }
+                },
+                ContextCompat.getMainExecutor(it)
+            )
+        }
     }
 
     fun toggleTorch() {
@@ -145,4 +200,6 @@ class CameraManager(
         cameraProvider?.unbindAll()
         getSelectedAnalyzer().stop()
     }
+
+    private fun requireContext() = activity ?: fragment?.requireContext()
 }
