@@ -6,7 +6,6 @@ import android.graphics.drawable.BitmapDrawable
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.ColorInt
-import androidx.annotation.ColorRes
 import androidx.annotation.DimenRes
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -14,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.toRectF
 import com.appwise.scanner.R
 import com.appwise.scanner.rect
+
 
 class TargetOverlay @JvmOverloads constructor(
     ctx: Context,
@@ -58,28 +58,34 @@ class TargetOverlay @JvmOverloads constructor(
     private fun drawBackgroundAndScanArea() {
         findViewById<View>(R.id.ivScanArea)?.let { scanArea ->
             if (mScanAreaDrawable != -1)
-                setBackgroundResource(mScanAreaDrawable)
+                scanArea.setBackgroundResource(mScanAreaDrawable)
 
             val scanAreaPath = Path().also {
                 it.fillType = Path.FillType.WINDING
-                it.addRect(0f, 0f, width.toFloat(), height.toFloat(), Path.Direction.CW)
                 it.addRect(scanArea.rect.toRectF(), Path.Direction.CCW)
             }
 
             val transparentPaint = Paint(Paint.ANTI_ALIAS_FLAG).also {
                 it.style = Paint.Style.FILL
-                //backgroundCanvas.drawColor(if (mScanMaskColor != -1) mScanMaskColor else Color.BLACK)
-                it.color = Color.argb(150, 0, 0, 0)
+                it.color = Color.TRANSPARENT
+                it.xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
                 if (mScanAreaCornerRadius != -1) {
                     it.strokeCap = Paint.Cap.ROUND
                     it.pathEffect = CornerPathEffect(resources.getDimension(mScanAreaCornerRadius))
                 }// set the path effect when they join.
             }
 
-            val backgroundBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-            val backgroundCanvas = Canvas(backgroundBitmap)
+            val maskPaint = Paint(Paint.ANTI_ALIAS_FLAG).also {
+                it.color = if (mScanMaskColor != -1) mScanMaskColor else Color.argb(255, 0, 0, 0)
+                it.xfermode = PorterDuffXfermode(PorterDuff.Mode.ADD)
+                it.isAntiAlias = true
+            }
+
+            val background = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+            val backgroundCanvas = Canvas(background)
+            backgroundCanvas.drawRect(0.0f, 0.0f, width.toFloat(), height.toFloat(), maskPaint)
             backgroundCanvas.drawPath(scanAreaPath, transparentPaint)
-            this@TargetOverlay.background = BitmapDrawable(context.resources, backgroundBitmap)
+            this@TargetOverlay.background = BitmapDrawable(context.resources, background)
 
             postInvalidate()
         }

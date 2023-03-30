@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    >
+    xmlns:tools="http://schemas.android.com/tools">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -14,10 +14,11 @@
 
         <com.appwise.scanner.base.TargetOverlay
             android:id="@+id/overlay"
-            app:scanAreaDrawable="@drawable/common_full_open_on_phone"
-            app:scanAreaCornerRadius="@dimen/dieter"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            app:scanAreaCornerRadius="@dimen/dieter"
+            app:scanAreaDrawable="@drawable/ic_bg_scan_area"
+            app:scanMaskColor="@color/scan_mask_color">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/ivScanArea"
@@ -40,5 +41,43 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivSwitchCamera"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="20dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ivSwitchAnalyzer"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintHorizontal_chainStyle="packed"
+            app:layout_constraintStart_toStartOf="parent"
+            app:srcCompat="@drawable/baseline_sync_24" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivSwitchAnalyzer"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="20dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/ivFlashLight"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/ivSwitchCamera"
+            app:srcCompat="@drawable/baseline_qr_code_scanner_24" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/ivFlashLight"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_marginBottom="20dp"
+            android:padding="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/ivSwitchAnalyzer"
+            app:srcCompat="@drawable/baseline_flash_off_24" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

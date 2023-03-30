@@ -1,36 +1,21 @@
 package com.wisemen.scanwise
 
-import android.Manifest
-import android.app.Activity
-import android.content.pm.PackageManager
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.camera.core.Logger
-import androidx.core.content.ContextCompat
+import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.appwise.scanner.CameraSearchType
+import com.appwise.scanner.FilterResult
 import com.appwise.scanner.barcode.BarcodeTarget
 import com.appwise.scanner.base.CameraManager
 import com.appwise.scanner.base.TargetOverlay
+import com.appwise.scanner.scanresult.ScanCodeResultContract
+import com.appwise.scanner.scanresult.ScanResultConfig
 import com.google.android.material.snackbar.Snackbar
 import com.wisemen.scanwise.databinding.ActivityMainBinding
-import com.appwise.scanner.scanresult.ScanCodeResult
-import com.appwise.scanner.scanresult.ScanCodeResultContract
-import com.appwise.scanner.scanresult.ScanResultActivity
-import com.appwise.scanner.scanresult.ScanResultConfig
 
 class MainActivity : AppCompatActivity() {
-
     private lateinit var mBinding: ActivityMainBinding
-
-    private val requestCameraPermissions = registerForActivityResult(ActivityResultContracts.RequestPermission()) { permissionGranted ->
-
-            if (permissionGranted) {
-                cameraManager.startCamera()
-            }
-        }
 
     private lateinit var cameraManager: CameraManager
 
@@ -45,10 +30,15 @@ class MainActivity : AppCompatActivity() {
             mBinding.previewView,
             this,
             { mBinding.overlay }, // This is done with a high-order-function because of changing the scan Analyzer
-            CameraSearchType.QR
+            CameraSearchType.QR,
+            FilterResult(prefix = "test_")
         ).apply {
             showTargetBoxes = BuildConfig.DEBUG
             setCameraManagerListener(object : CameraManager.CameraManagerListener {
+                override fun analyzerChanged(cameraSearchType: CameraSearchType) {
+
+                }
+
                 override fun targetsFound(targets: List<TargetOverlay.Target>) {
                     if (targets.isEmpty()) return
                     when (val target = targets.firstOrNull()) {
@@ -57,9 +47,14 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 }
+
+                override fun flashLightStateChanged(flashlightOn: Boolean) {
+
+                }
             })
         }
-        requestCameraPermissions.launch(Manifest.permission.CAMERA)
+
+        cameraManager.start()
 
         mBinding.btnFlashlight.setOnClickListener {
             cameraManager.toggleTorch()
@@ -74,29 +69,26 @@ class MainActivity : AppCompatActivity() {
         }
 
         mBinding.btnStartScanResult.setOnClickListener {
-            contract.launch(ScanResultConfig(true,CameraSearchType.QR))
+            contract.launch(ScanResultConfig(true, CameraSearchType.QR, switchAnalyzerEnabled = true, switchCameraEnabled = true, toggleFlashLightEnabled = true))
         }
     }
 
-    private val contract = registerForActivityResult(ScanCodeResultContract()){ scanCodeResult ->
-        Log.d("this is scancoderesult","${scanCodeResult?.code}")
+    private val contract = registerForActivityResult(ScanCodeResultContract()) { scanCodeResult ->
+        Log.d("this is scancoderesult", "${scanCodeResult?.code}")
     }
 
     override fun onResume() {
         super.onResume()
-
-        if (hasPermission(Manifest.permission.CAMERA)) {
-            cameraManager.startCamera()
+        when (cameraManager.cameraSearchType) {
+            CameraSearchType.Barcode -> cameraManager.changeCameraType(CameraSearchType.QR)
+            CameraSearchType.QR -> cameraManager.changeCameraType(CameraSearchType.OCR)
+            CameraSearchType.OCR -> cameraManager.changeCameraType(CameraSearchType.Barcode)
         }
+        //Snackbar.make(mBinding.root, "Analyzer changed to ${cameraManager.cameraSearchType}", Snackbar.LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-
         cameraManager.stopCamera()
     }
-}
-
-fun Activity.hasPermission(permission: String): Boolean {
-    return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
 }

@@ -1,6 +1,7 @@
 package com.appwise.scanner.qr
 
 import android.util.Log
+import com.appwise.scanner.FilterResult
 import com.appwise.scanner.base.BaseAnalyzer
 import com.appwise.scanner.base.TargetOverlay
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
@@ -13,7 +14,8 @@ class QRAnalyzer(
     overlay: () -> TargetOverlay,
     override val isFrontLens: Boolean,
     override val showTargetBoxes: Boolean,
-    onValueFound: (List<TargetOverlay.Target>) -> Unit
+    onValueFound: (List<TargetOverlay.Target>) -> Unit,
+    override val filterResult: FilterResult?,
 ) : BaseAnalyzer<List<Barcode>>(overlay, onValueFound) {
 
     private val options = BarcodeScannerOptions.Builder()
@@ -37,5 +39,6 @@ class QRAnalyzer(
     }
 
     override fun getTargets(results: List<Barcode>, width: Int, height: Int) =
-        results.map { QRCodeTarget(overlay(), it, it.boundingBox!!.transform(width, height)) }
+        results.filter { filterResult?.filterScannerResult(it.rawValue) ?: true }
+            .map { QRCodeTarget(overlay(), it, it.boundingBox!!.transform(width, height)) }
 }

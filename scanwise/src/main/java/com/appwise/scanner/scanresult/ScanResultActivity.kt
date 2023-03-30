@@ -9,8 +9,10 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import androidx.databinding.DataBindingUtil
 import com.appwise.scanner.BuildConfig
+import com.appwise.scanner.CameraSearchType
 import com.appwise.scanner.R
 import com.appwise.scanner.barcode.BarcodeTarget
 import com.appwise.scanner.base.CameraManager
@@ -33,16 +35,21 @@ class ScanResultActivity : AppCompatActivity() {
 
         mScanResultConfig = intent.getParcelableExtra(SCAN_RESULT_CONFIG) as ScanResultConfig?
 
-        mScanResultConfig?.cameraSearchType?.let {
+        mScanResultConfig?.let {
             cameraManager = CameraManager(
                 this,
                 mBinding.previewView,
                 this,
                 { mBinding.overlay }, // This is done with a high-order-function because of changing the scan Analyzer
-                it
+                it.cameraSearchType,
+                it.filterResult
             ).apply {
                 showTargetBoxes = BuildConfig.DEBUG
                 setCameraManagerListener(object : CameraManager.CameraManagerListener {
+                    override fun analyzerChanged(cameraSearchType: CameraSearchType) {
+
+                    }
+
                     override fun targetsFound(targets: List<TargetOverlay.Target>) {
                         if (targets.isEmpty()) return
                         val code = when (val target = targets.firstOrNull()) {
@@ -57,21 +64,36 @@ class ScanResultActivity : AppCompatActivity() {
                         else
                             Log.d("TAG", "targetsFound: $code")
                     }
+
+                    override fun flashLightStateChanged(flashlightOn: Boolean) {
+                        mBinding.ivFlashLight.setImageResource(if(flashlightOn) R.drawable.baseline_flash_on_24 else R.drawable.baseline_flash_off_24)
+                    }
                 })
             }
         }
+        cameraManager.start()
 
-        /* mBinding.btnFlashlight.setOnClickListener {
+         mBinding.ivFlashLight.setOnClickListener {
              cameraManager.toggleTorch()
          }
 
-         mBinding.btnSwitchCamera.setOnClickListener {
+         mBinding.ivSwitchCamera.setOnClickListener {
              cameraManager.changeCameraSelector()
          }
 
-         mBinding.btnSwitchAnalyzer.setOnClickListener {
+         mBinding.ivSwitchAnalyzer.setOnClickListener {
              cameraManager.changeCameraType(CameraSearchType.Barcode)
-         }*/
+         }
+
+        manageConfig(mScanResultConfig)
+    }
+
+    private fun manageConfig(mScanResultConfig: ScanResultConfig?) {
+        with(mBinding){
+            ivFlashLight.isVisible = mScanResultConfig?.toggleFlashLightEnabled == true
+            ivSwitchCamera.isVisible = mScanResultConfig?.switchCameraEnabled == true
+            ivSwitchAnalyzer.isVisible = mScanResultConfig?.switchAnalyzerEnabled == true
+        }
     }
 
     private fun setResult(code: String?) {
@@ -80,22 +102,9 @@ class ScanResultActivity : AppCompatActivity() {
         finish()
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        if (hasPermission(Manifest.permission.CAMERA)) {
-            cameraManager.startCamera()
-        }
-    }
-
     override fun onDestroy() {
         super.onDestroy()
-
         cameraManager.stopCamera()
-    }
-
-    fun Activity.hasPermission(permission: String): Boolean {
-        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
     }
 }
 
