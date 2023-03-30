@@ -31,39 +31,37 @@ class CameraManager {
 
     private var fragment: Fragment? = null
     private var activity: ComponentActivity? = null
-    private lateinit var finderView: PreviewView
-    private lateinit var lifecycleOwner: LifecycleOwner
-    private lateinit var targetOverlay: () -> TargetOverlay
+    private var finderView: PreviewView
+    private var lifecycleOwner: LifecycleOwner
+    private var targetOverlay: () -> TargetOverlay
     var cameraSearchType: CameraSearchType = CameraSearchType.Barcode
 
-    fun init(
+    constructor(
         fragment: Fragment,
         finderView: PreviewView,
         lifecycleOwner: LifecycleOwner,
         targetOverlay: () -> TargetOverlay,
         cameraSearchType: CameraSearchType = CameraSearchType.Barcode
-    ): CameraManager {
+    ) {
         this.fragment = fragment
         this.finderView = finderView
         this.lifecycleOwner = lifecycleOwner
         this.targetOverlay = targetOverlay
         this.cameraSearchType = cameraSearchType
-        return this
     }
 
-    fun init(
+    constructor(
         activity: ComponentActivity,
         finderView: PreviewView,
         lifecycleOwner: LifecycleOwner,
         targetOverlay: () -> TargetOverlay,
         cameraSearchType: CameraSearchType = CameraSearchType.Barcode
-    ): CameraManager {
+    ) {
         this.activity = activity
         this.finderView = finderView
         this.lifecycleOwner = lifecycleOwner
         this.targetOverlay = targetOverlay
         this.cameraSearchType = cameraSearchType
-        return this
     }
 
     interface CameraManagerListener {

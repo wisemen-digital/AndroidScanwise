@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
 
         super.onCreate(savedInstanceState)
 
-        cameraManager = CameraManager().init(
+        cameraManager = CameraManager(
             this,
             mBinding.previewView,
             this,
