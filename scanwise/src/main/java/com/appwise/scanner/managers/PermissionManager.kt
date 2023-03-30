@@ -8,7 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 
-object PermissionManager {
+internal object PermissionManager {
     private lateinit var requestCameraPermission: ActivityResultLauncher<String>
 
     /**
@@ -60,7 +60,7 @@ object PermissionManager {
      *
      * @param activity is the activity that will be used to request the permission.
      */
-    fun requestPermission(activity: Activity, onSuccess: () -> Unit) {
+    private fun requestPermission(activity: Activity, onSuccess: () -> Unit) {
         require(::requestCameraPermission.isInitialized) {
             "You need to call initPermissionRequests before requesting permissions."
         }
@@ -72,7 +72,7 @@ object PermissionManager {
         }
     }
 
-    fun hasCameraPermission(activity: Activity): Boolean {
+    private fun hasCameraPermission(activity: Activity): Boolean {
         return ContextCompat.checkSelfPermission(
             activity,
             android.Manifest.permission.CAMERA
