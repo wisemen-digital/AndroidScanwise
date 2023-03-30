@@ -1,4 +1,4 @@
-package com.wisemen.scanwise.scanresult
+package com.appwise.scanner.scanresult
 
 import android.app.Activity
 import android.content.Context
@@ -8,18 +8,12 @@ import androidx.activity.result.contract.ActivityResultContract
 import com.appwise.scanner.CameraSearchType
 import kotlinx.parcelize.Parcelize
 
-class ScanCodeResultContract() : ActivityResultContract<ScanCodeResultContract.ScanResultConfig, ScanCodeResult?>() {
+class ScanCodeResultContract() : ActivityResultContract<ScanResultConfig, ScanCodeResult?>() {
 
     companion object {
         const val SCAN_RESULT_CONFIG = "scan_result_config"
         const val SCAN_CODE_RESULT = "scan_code_result"
     }
-
-    @Parcelize
-    data class ScanResultConfig(
-        val autoReturnScanResult : Boolean,
-        val cameraSearchType: CameraSearchType
-    ) : Parcelable
 
     override fun createIntent(context: Context, input: ScanResultConfig) = Intent(context, ScanResultActivity::class.java).putExtra(SCAN_RESULT_CONFIG, input)
 

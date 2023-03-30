@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="scan_black">#66000000</color>
+    <color name="scan_mask_color">#33E47200</color>
+    <dimen name="dieter">20dp</dimen>
+</resources>

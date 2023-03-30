@@ -1,6 +1,9 @@
 plugins {
     id 'com.android.library'
     id 'org.jetbrains.kotlin.android'
+    id 'kotlin-parcelize'
+
+
 //    id 'org.jetbrains.kotlin.android'
 //    id 'kotlin-kapt'
 //    id 'androidx.navigation.safeargs.kotlin'
@@ -52,6 +55,8 @@ dependencies {
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
 
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.5.1"
+
+    api 'com.google.android.material:material:1.5.0'
 
     def camerax_version = "1.1.0-beta03"
     // The following line is optional, as the core library is included indirectly by camera-camera2

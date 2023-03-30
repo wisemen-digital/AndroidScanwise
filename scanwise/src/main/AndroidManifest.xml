@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.appwise.scanner">
+
+    <application
+        tools:targetApi="31"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:supportsRtl="true">
+        <activity
+            android:name="com.appwise.scanner.scanresult.ScanResultActivity"
+            android:exported="false" />
+
+    </application>
 
 </manifest>

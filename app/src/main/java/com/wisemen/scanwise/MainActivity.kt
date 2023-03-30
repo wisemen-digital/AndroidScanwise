@@ -16,16 +16,16 @@ import com.appwise.scanner.base.CameraManager
 import com.appwise.scanner.base.TargetOverlay
 import com.google.android.material.snackbar.Snackbar
 import com.wisemen.scanwise.databinding.ActivityMainBinding
-import com.wisemen.scanwise.scanresult.ScanCodeResult
-import com.wisemen.scanwise.scanresult.ScanCodeResultContract
-import com.wisemen.scanwise.scanresult.ScanResultActivity
+import com.appwise.scanner.scanresult.ScanCodeResult
+import com.appwise.scanner.scanresult.ScanCodeResultContract
+import com.appwise.scanner.scanresult.ScanResultActivity
+import com.appwise.scanner.scanresult.ScanResultConfig
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mBinding: ActivityMainBinding
 
-    private val requestCameraPermissions =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { permissionGranted ->
+    private val requestCameraPermissions = registerForActivityResult(ActivityResultContracts.RequestPermission()) { permissionGranted ->
 
             if (permissionGranted) {
                 cameraManager.startCamera()
@@ -53,7 +53,6 @@ class MainActivity : AppCompatActivity() {
                     if (targets.isEmpty()) return
                     when (val target = targets.firstOrNull()) {
                         is BarcodeTarget -> {
-
                             Log.d("TAG", "targetsFound: $target")
                         }
                     }
@@ -75,7 +74,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         mBinding.btnStartScanResult.setOnClickListener {
-            contract.launch(ScanCodeResultContract.ScanResultConfig(true,CameraSearchType.QR))
+            contract.launch(ScanResultConfig(true,CameraSearchType.QR))
         }
     }
 

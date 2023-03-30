@@ -1,33 +1,28 @@
-package com.wisemen.scanwise.scanresult
+package com.appwise.scanner.scanresult
 
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import com.appwise.scanner.BuildConfig
+import com.appwise.scanner.R
 import com.appwise.scanner.barcode.BarcodeTarget
 import com.appwise.scanner.base.CameraManager
 import com.appwise.scanner.base.TargetOverlay
+import com.appwise.scanner.databinding.ActivityScanResultBinding
 import com.appwise.scanner.qr.QRCodeTarget
-import com.wisemen.scanwise.BuildConfig
-import com.wisemen.scanwise.R
-import com.wisemen.scanwise.databinding.ActivityScanResultBinding
-import com.wisemen.scanwise.hasPermission
-import com.wisemen.scanwise.scanresult.ScanCodeResultContract.Companion.SCAN_RESULT_CONFIG
+import com.appwise.scanner.scanresult.ScanCodeResultContract.Companion.SCAN_RESULT_CONFIG
 
 class ScanResultActivity : AppCompatActivity() {
 
-    private var mScanResultConfig: ScanCodeResultContract.ScanResultConfig? = null
+    private var mScanResultConfig: ScanResultConfig? = null
     private lateinit var mBinding: ActivityScanResultBinding
-
-    private val requestCameraPermissions = registerForActivityResult(ActivityResultContracts.RequestPermission()) { permissionGranted ->
-        if (permissionGranted) {
-            cameraManager.startCamera()
-        }
-    }
 
     private lateinit var cameraManager: CameraManager
 
@@ -36,7 +31,7 @@ class ScanResultActivity : AppCompatActivity() {
         mBinding.lifecycleOwner = this
         super.onCreate(savedInstanceState)
 
-        mScanResultConfig = intent.getParcelableExtra(SCAN_RESULT_CONFIG) as ScanCodeResultContract.ScanResultConfig?
+        mScanResultConfig = intent.getParcelableExtra(SCAN_RESULT_CONFIG) as ScanResultConfig?
 
         mScanResultConfig?.cameraSearchType?.let {
             cameraManager = CameraManager(
@@ -64,7 +59,6 @@ class ScanResultActivity : AppCompatActivity() {
                     }
                 })
             }
-            requestCameraPermissions.launch(Manifest.permission.CAMERA)
         }
 
         /* mBinding.btnFlashlight.setOnClickListener {
@@ -98,6 +92,10 @@ class ScanResultActivity : AppCompatActivity() {
         super.onDestroy()
 
         cameraManager.stopCamera()
+    }
+
+    fun Activity.hasPermission(permission: String): Boolean {
+        return ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
     }
 }
 

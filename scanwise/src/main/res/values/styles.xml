@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ========================================================= -->
+    <!-- ========================================================= -->
+    <!-- TargetOverlay-->
+    <!-- ========================================================= -->
+    <!-- ========================================================= -->
+    <style name="Widget.Scanwise.TargetOverlay" parent="android:Widget">
+        <item name="scanAreaCornerRadius"></item>
+        <item name="scanAreaCornerRadius"></item>
+        <item name="scanAreaCornerRadius"></item>
+    </style>
+</resources>
