@@ -1,6 +1,7 @@
 package com.appwise.scanner.barcode
 
 import android.util.Log
+import com.appwise.scanner.FilterResult
 import com.appwise.scanner.base.BaseAnalyzer
 import com.appwise.scanner.base.TargetOverlay
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
@@ -13,7 +14,8 @@ class CodeAnalyzer(
     overlay: () -> TargetOverlay,
     override val isFrontLens: Boolean,
     override val showTargetBoxes: Boolean,
-    onValueFound: (List<TargetOverlay.Target>) -> Unit
+    onValueFound: (List<TargetOverlay.Target>) -> Unit,
+    override val filterResult: FilterResult?,
 ) : BaseAnalyzer<List<Barcode>>(overlay, onValueFound) {
 
     // Make sure only the typical barcodes can be scanned
@@ -48,5 +50,6 @@ class CodeAnalyzer(
     }
 
     override fun getTargets(results: List<Barcode>, width: Int, height: Int) =
-        results.map { BarcodeTarget(overlay(), it, it.boundingBox!!.transform(width, height)) }
+        results.filter { filterResult?.filterScannerResult(it.rawValue) ?: true }
+            .map { BarcodeTarget(overlay(), it, it.boundingBox!!.transform(width, height)) }
 }
