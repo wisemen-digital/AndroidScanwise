@@ -51,6 +51,7 @@ class CameraManager {
         this.lifecycleOwner = lifecycleOwner
         this.targetOverlay = targetOverlay
         this.cameraSearchType = cameraSearchType
+        this.filterResult = filterResult
     }
 
     constructor(
@@ -58,13 +59,15 @@ class CameraManager {
         finderView: PreviewView,
         lifecycleOwner: LifecycleOwner,
         targetOverlay: () -> TargetOverlay,
-        cameraSearchType: CameraSearchType = CameraSearchType.Barcode
+        cameraSearchType: CameraSearchType = CameraSearchType.Barcode,
+        filterResult: FilterResult
     ) {
         this.activity = activity
         this.finderView = finderView
         this.lifecycleOwner = lifecycleOwner
         this.targetOverlay = targetOverlay
         this.cameraSearchType = cameraSearchType
+        this.filterResult = filterResult
     }
 
     interface CameraManagerListener {
