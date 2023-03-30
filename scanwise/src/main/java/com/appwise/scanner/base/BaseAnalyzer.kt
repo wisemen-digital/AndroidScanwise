@@ -7,15 +7,20 @@ import android.view.View
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.ImageProxy
 import androidx.core.graphics.toRectF
+import com.appwise.scanner.FilterResult
 import com.appwise.scanner.R
 import com.appwise.scanner.rect
 import com.google.android.gms.tasks.Task
 import com.google.mlkit.vision.common.InputImage
 
-abstract class BaseAnalyzer<T>(val overlay: () -> TargetOverlay, val onValueFound: (results: List<TargetOverlay.Target>) -> Unit) : ImageAnalysis.Analyzer {
+abstract class BaseAnalyzer<T>(
+    val overlay: () -> TargetOverlay,
+    val onValueFound: (results: List<TargetOverlay.Target>) -> Unit
+) : ImageAnalysis.Analyzer {
 
     abstract val isFrontLens: Boolean
     abstract val showTargetBoxes: Boolean
+    abstract val filterResult: FilterResult?
 
     abstract fun searchInImage(image: InputImage): Task<T>
     abstract fun stop()

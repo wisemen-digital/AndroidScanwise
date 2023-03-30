@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.appwise.scanner.CameraSearchType
+import com.appwise.scanner.FilterResult
 import com.appwise.scanner.barcode.BarcodeTarget
 import com.appwise.scanner.base.CameraManager
 import com.appwise.scanner.base.TargetOverlay
@@ -40,7 +41,8 @@ class MainActivity : AppCompatActivity() {
             mBinding.previewView,
             this,
             { mBinding.overlay }, // This is done with a high-order-function because of changing the scan Analyzer
-            CameraSearchType.QR
+            CameraSearchType.QR,
+            FilterResult(prefix = "test_")
         ).apply {
             showTargetBoxes = BuildConfig.DEBUG
             setCameraManagerListener(object : CameraManager.CameraManagerListener {

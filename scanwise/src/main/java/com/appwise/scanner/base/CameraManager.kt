@@ -17,6 +17,7 @@ import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import com.appwise.scanner.CameraSearchType
+import com.appwise.scanner.FilterResult
 import com.appwise.scanner.barcode.CodeAnalyzer
 import com.appwise.scanner.qr.QRAnalyzer
 import com.appwise.scanner.text.TextAnalyzer
@@ -31,7 +32,8 @@ class CameraManager(
     private val lifecycleOwner: LifecycleOwner,
     private val targetOverlay: () -> TargetOverlay,
     // the default for this is the barcode scanner
-    var cameraSearchType: CameraSearchType = CameraSearchType.Barcode
+    private var cameraSearchType: CameraSearchType = CameraSearchType.Barcode,
+    private val filterResult: FilterResult? = null
 ) {
 
     interface CameraManagerListener {
@@ -56,9 +58,27 @@ class CameraManager(
     private var mCameraManagerListener: CameraManagerListener? = null
 
     private fun getSelectedAnalyzer() = when (cameraSearchType) {
-        CameraSearchType.Barcode -> CodeAnalyzer(targetOverlay, isFrontLens, showTargetBoxes, targetFoundListener)
-        CameraSearchType.OCR -> TextAnalyzer(targetOverlay, isFrontLens, showTargetBoxes, targetFoundListener)
-        CameraSearchType.QR -> QRAnalyzer(targetOverlay, isFrontLens, showTargetBoxes, targetFoundListener)
+        CameraSearchType.Barcode -> CodeAnalyzer(
+            targetOverlay,
+            isFrontLens,
+            showTargetBoxes,
+            targetFoundListener,
+            filterResult
+        )
+        CameraSearchType.OCR -> TextAnalyzer(
+            targetOverlay,
+            isFrontLens,
+            showTargetBoxes,
+            targetFoundListener,
+            filterResult
+        )
+        CameraSearchType.QR -> QRAnalyzer(
+            targetOverlay,
+            isFrontLens,
+            showTargetBoxes,
+            targetFoundListener,
+            filterResult
+        )
     }
 
     private val isFrontLens get() = cameraSelectorOption == CameraSelector.LENS_FACING_FRONT
@@ -96,7 +116,10 @@ class CameraManager(
                     cameraProvider?.unbindAll()
                     camera = cameraProvider?.bindToLifecycle(lifecycleOwner, cameraSelector, preview, imageAnalyzer)
 
-                    val autoFocusAction = FocusMeteringAction.Builder(SurfaceOrientedMeteringPointFactory(1f, 1f).createPoint(0.5f, 0.5f), FocusMeteringAction.FLAG_AF).apply {
+                    val autoFocusAction = FocusMeteringAction.Builder(
+                        SurfaceOrientedMeteringPointFactory(1f, 1f).createPoint(0.5f, 0.5f),
+                        FocusMeteringAction.FLAG_AF
+                    ).apply {
                         setAutoCancelDuration(2, TimeUnit.SECONDS)
                     }.build()
                     camera?.cameraControl?.startFocusAndMetering(autoFocusAction)
@@ -132,7 +155,9 @@ class CameraManager(
 
     fun changeCameraSelector() {
         cameraProvider?.unbindAll()
-        cameraSelectorOption = if (cameraSelectorOption == CameraSelector.LENS_FACING_BACK) CameraSelector.LENS_FACING_FRONT else CameraSelector.LENS_FACING_BACK
+        cameraSelectorOption =
+            if (cameraSelectorOption == CameraSelector.LENS_FACING_BACK) CameraSelector.LENS_FACING_FRONT
+            else CameraSelector.LENS_FACING_BACK
         startCamera()
     }
 
